@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.urls import reverse
 
 # class User(models.Model):
 #     username = models.CharField(max_length = 20)
@@ -27,6 +28,10 @@ class Author(models.Model):
         self.author_rat = author_post_rat * 3 + author_comment_rat + comment_author_rat
         self.save()
 
+    def __str__(self):
+        return self.user.username
+
+
 
 class Category(models.Model):
     category_theme = models.CharField(max_length = 30, unique = True)
@@ -36,12 +41,12 @@ class Post(models.Model):
     news = "news"
     CHOICE = [(stat, "Статья"), (news, "Новости")]
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    snpost = models.CharField(max_length = 10, choices = CHOICE, default = news)
-    post_cat = models.ManyToManyField(Category, through = "PostCategory")
-    post_head = models.CharField(max_length = 50)
-    post_rat = models.IntegerField(default = 0)
+    snpost = models.CharField(max_length=10, choices=CHOICE, default=news)
+    post_cat = models.ManyToManyField(Category, through="PostCategory")
+    post_head = models.CharField(max_length=50)
+    post_rat = models.IntegerField(default=0)
     post_text = models.TextField()
-    post_date = models.DateTimeField(auto_now_add = True)
+    post_date = models.DateTimeField(auto_now_add=True)
 
     def like(self):
         self.post_rat += 1
@@ -55,6 +60,9 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.post_head.title()}: {self.post_text[:20]}'
+
+    def get_absolute_url(self):
+        return reverse('default', args=[str(self.id)])
 
 class PostCategory(models.Model):
     post_category = models.ForeignKey(Post, on_delete = models.CASCADE)
